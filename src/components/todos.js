@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { curry } from '../lib/fp'
 
+import {} from './todos.css'
+
 import TodosInput from './todos-input'
 import TodosList from './todos-list'
 
@@ -84,13 +86,13 @@ export default class Todos extends Component {
     render() {
         return (
             <div className="todos">
-                <div className="todos-header">
+                <span className="todos-header">
                     <input type='checkbox'
                         className={'todos-checkbox' + ((this.state.todos.length == 0) ? " hidden" : "") }
                         checked={this.isAllComplete() ? true : false}
                         onChange={this.setCompletedAllHandle.bind(this) } />
                     <TodosInput addTodoHandle={this.addTodo.bind(this) } />
-                </div>
+                </span>
                 <TodosList
                     todos={ this.state.todos }
                     changeCompletedHandle={ this.setCompleted.bind(this) }

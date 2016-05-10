@@ -1,0 +1,66 @@
+.todos {
+    width: 600px;
+    margin: 0 auto;
+    background-color: lightcyan;
+}
+
+.todos-header{
+    display: table;
+    width: 100%;
+}
+
+ .todos-input{
+     display: table-cell;
+     width: 100%;
+ }
+ 
+  .todos-input-input {
+    width: 100%;
+    box-sizing: border-box;
+    /*margin-right: 0px;*/
+}
+
+
+.todos-list-list {
+    padding: 0 0;
+}
+.todos-list-item {
+    position: relative;
+    top: 0;
+    list-style-type: none;
+}
+.todos-list-item-remove {
+    /*visibility: hidden;*/
+    
+    position: absolute;
+    right: 0;
+    width: 40px;
+    
+    background-color: transparent;
+    color: red;
+    border: transparent;
+}
+.todos-list-item:hover .todos-list-item-remove {
+    visibility: visible;
+}
+
+.todos-footer {
+    position: relative;
+    top: 0;
+}
+.todos-footer-btn {
+    border: none;
+}
+.todos-footer-counter {
+    /*position: absolute;*/
+    left: 0;
+}
+.todos-footer-filters {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+.todos-footer-btn-remove {
+    position: absolute;
+    right: 0;
+}

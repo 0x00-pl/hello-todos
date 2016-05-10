@@ -29,11 +29,13 @@ class TLFooter extends Component {
     render() {
         return (
             <div className='todos-footer'>
-                <span>{this.props.active_count} items left</span>
-                <button className='todos-footer-btn' onClick={this.props.showAllHandle} >All</button>
-                <button className='todos-footer-btn' onClick={this.props.showActiveHandle} >Active</button>
-                <button className='todos-footer-btn' onClick={this.props.showCompletedHandle} >Completed</button>
-                <button className={'todos-footer-btn'+((this.props.completed_count==0)?" hidden":"")}
+                <span className='todos-footer-counter' >{this.props.active_count} items left</span>
+                <span className='todos-footer-filters'>
+                    <button className='todos-footer-btn' onClick={this.props.showAllHandle} >All</button>
+                    <button className='todos-footer-btn' onClick={this.props.showActiveHandle} >Active</button>
+                    <button className='todos-footer-btn' onClick={this.props.showCompletedHandle} >Completed</button>
+                </span>
+                <button className={'todos-footer-btn todos-footer-btn-remove'+((this.props.completed_count==0)?" hidden":"")}
                     onClick={this.props.clearCompletedHandle}>
                     Clear completed
                     </button>

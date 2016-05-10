@@ -33,10 +33,10 @@ export default class TodosInput extends Component {
     }
     render() {
         return (
-            <div className='todos-input'>
+            <span className='todos-input'>
                 <input className='todos-input-input' type='text'
                     onKeyDown={this.onKeyDown.bind(this) } />
-            </div>
+            </span>
         )
     }
 }

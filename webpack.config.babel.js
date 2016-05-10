@@ -7,9 +7,15 @@ export default {
         filename: 'bundle.js'
     },
     module: {
-        loaders: [{
-            test: /.jsx?$/,
-            loader: 'babel'
-        }]
+        loaders: [
+            {
+                test: /\.jsx?$/,
+                loader: 'babel'
+            },
+            {
+                test: /\.css$/,
+                loader: 'style!css'
+            }
+        ]
     }
 }
