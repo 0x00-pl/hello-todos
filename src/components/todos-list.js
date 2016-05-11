@@ -15,8 +15,8 @@ class TLItem extends Component {
                 <input type='checkbox' className='todos-list-item-checkbox todos-checkbox'
                     checked={this.props.todo.completed}
                     onChange={this.changeCompletedHandle.bind(this) } />
-                <span>{ this.props.todo.text }</span>
-                <button className="todos-list-item-remove"
+                <span className='todos-list-item-text' >{ this.props.todo.text }</span>
+                <button className='todos-list-item-remove'
                     onClick={this.onRemove.bind(this) } >
                     X
                 </button>
