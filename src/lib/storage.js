@@ -1,5 +1,5 @@
 
-class DummyStorage {
+export class DummyStorage {
     constructor(onChangeHandle, cb_storage) {
         this.onChangeHandle = onChangeHandle
         cb_storage(this)
@@ -22,44 +22,62 @@ class DummyStorage {
 }
 
 
-class TempStorage {
+export class TempStorage {
     constructor(onChangeHandle, cb_storage) {
         this.onChangeHandle = onChangeHandle
         this.datas = []
+        this.idx = 0
         cb_storage(this)
     }
     getDatas(cb_datas) {
         cb_datas(this.datas)
     }
     addData(data, cb_pk) {
-        let pk = this.datas.length
-        this.datas = this.datas.concat(data)
+        this.idx = this.idx + 1
+        let data_ = Object.assign({}, data, { id: this.idx })
+        this.datas = this.datas.concat(data_)
         this.onChangeHandle()
-        cb_pk(pk)
+        cb_pk(this.idx)
     }
     getData(pk, cb_data) {
-        cb_data(this.datas[pk])
+        let data_ = this.datas.filter((i) => i.id == pk)
+        if (data_.length == 0) {
+            cb_data(undefined)
+        } else {
+            cb_data(data_[0])
+        }
     }
     removeData(pk, cb_data) {
-        let data_l = this.datas.slice(0, pk)
-        let data = this.datas[pk]
-        let data_r = this.datas.slice(pk + 1)
-        this.datas = Array.prototype.concat(data_l, data_r)
+        let data = undefined
+        this.datas = this.datas.filter((i) => {
+            if (i.id == pk) {
+                data = i
+                return false
+            } else {
+                return true
+            }
+        })
         this.onChangeHandle()
         cb_data(data)
     }
     changeData(pk, data, cb_data) {
-        let data_l = this.datas.slice(0, pk)
-        let data_o = this.datas[pk]
-        let data_r = this.datas.slice(pk + 1)
-        this.datas = Array.prototype.concat(data_l, [data], data_r)
+        data.id = pk
+        let data_o = undefined
+        this.datas = this.datas.map((i) => {
+            if (i.id == pk) {
+                data_o = i
+                return data
+            } else {
+                return i
+            }
+        })
         this.onChangeHandle()
-        cb_data(data_0)
+        cb_data(data_o)
     }
 }
 
 
-class LocalStorage {
+export class LocalStorage {
     constructor(onChangeHandle, localStorageKey, cb_storage) {
         this.onChangeHandle = onChangeHandle
         this.localStorageKey = localStorageKey
@@ -77,46 +95,68 @@ class LocalStorage {
         cb_datas(datas)
     }
     addData(data, cb_pk) {
-        let datas = this.GetDatas()
-        let pk = datas.length
-        let new_datas = datas.concat(data)
-        window.localStorage.setItem(this.localStorageKey, new_datas)
-        this.onChangeHandle()
-        cb_pk(pk)
+        this.getDatas((datas) => {
+            let pk = window.localStorage.getItem(this.localStorageKey + '_idx') || 0
+            pk = pk | 0
+            window.localStorage.setItem(this.localStorageKey + '_idx', pk + 1)
+
+            data.id = pk
+            let new_datas = datas.concat(data)
+            let dataj = JSON.stringify(new_datas)
+            window.localStorage.setItem(this.localStorageKey, dataj)
+            this.onChangeHandle()
+            cb_pk(pk)
+        })
     }
     getData(pk, cb_data) {
-        let datas = this.GetDatas()
-        let data = datas[pk]
-        cb_data(data)
+        this.getDatas((datas) => {
+            let data_ = datas.filter((i) => i.id == pk)
+            if (data_.length == 0) {
+                cb_data(undefined)
+            } else {
+                cb_data(data_[0])
+            }
+        })
     }
     removeData(pk, cb_data) {
-        let datas = this.GetDatas()
-        let data_l = this.datas.slice(0, pk)
-        let data = this.datas[pk]
-        let data_r = this.datas.slice(pk + 1)
-        this.datas = Array.prototype.concat(data_l, data_r)
-
-        let datasj = JSON.stringify(datas)
-        window.localStorage.setItem(localStorageKey, this.datasj)
-        this.onChangeHandle()
-        cb_data(data)
+        this.getDatas((datas) => {
+            let data = undefined
+            let datas_new = datas.filter((i) => {
+                if (i.id == pk) {
+                    data = i
+                    return false
+                } else {
+                    return true
+                }
+            })
+            let datasj = JSON.stringify(datas_new)
+            window.localStorage.setItem(this.localStorageKey, datasj)
+            this.onChangeHandle()
+            cb_data(data)
+        })
     }
     changeData(pk, data, cb_data) {
-        let datas = this.GetDatas()
-        let data_l = this.datas.slice(0, pk)
-        let data_o = this.datas[pk]
-        let data_r = this.datas.slice(pk + 1)
-        this.datas = Array.prototype.concat(data_l, [data], data_r)
-
-        let datasj = JSON.stringify(datas)
-        window.localStorage.setItem(localStorageKey, this.datasj)
-        this.onChangeHandle()
-        cb_data(data_o)
+        this.getDatas((datas) => {
+            data.id = pk
+            let data_o = undefined
+            let datas_new = datas.map((i) => {
+                if (i.id == pk) {
+                    data_o = i
+                    return data
+                } else {
+                    return i
+                }
+            })
+            let datasj = JSON.stringify(datas_new)
+            window.localStorage.setItem(this.localStorageKey, datasj)
+            this.onChangeHandle()
+            cb_data(data_o)
+        })
     }
 }
 
 
-class RestStorage {
+export class RestStorage {
     constructor(onChangeHandle, rest_addr, cb_storage) {
         this.onChangeHandle = onChangeHandle
         if (!rest_addr.endsWith('/')) {
@@ -137,6 +177,7 @@ class RestStorage {
         this.ajax('POST', this.rest_addr, text,
             function (text) {
                 let pk = JSON.parse(text) | 0
+                this.onChangeHandle()
                 cb_pk(pk)
             })
     }
@@ -151,6 +192,7 @@ class RestStorage {
         this.ajax('DELETE', this.rest_addr + pk, '',
             function (text) {
                 let data = JSON.parse(text)
+                this.onChangeHandle()
                 cb_data(data)
             })
     }
@@ -159,6 +201,7 @@ class RestStorage {
         this.ajax('PUT', this.rest_addr + pk, text,
             function (text) {
                 let data = JSON.parse(text)
+                this.onChangeHandle()
                 cb_data(data)
             })
     }

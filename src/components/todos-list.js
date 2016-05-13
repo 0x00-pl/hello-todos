@@ -59,7 +59,6 @@ export default class TodoList extends Component {
         return this.props.todos
     }
     setShowing(s) {
-        console.log(s)
         this.setState({ showing: s })
     }
     getShowingTodos() {
@@ -74,7 +73,7 @@ export default class TodoList extends Component {
             <div className='todos-list'>
                 <ul className='todos-list-list' >
                     {this.getShowingTodos().map((todo, idx) =>
-                        <TLItem todo={todo} idx={idx}
+                        <TLItem todo={todo} idx={todo.id} key={todo.id}
                             removeHandle={this.props.removeHandle}
                             changeCompletedHandle={this.props.changeCompletedHandle} />
                     ) }
