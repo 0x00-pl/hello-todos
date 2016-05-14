@@ -4,7 +4,7 @@ var main_port = 8080;
 
 // imports
 var express = require('express');
-var db = require('node-mysql');
+var mysql = require('mysql');
 
 
 function app_server(public_dir, port) {
@@ -21,59 +21,113 @@ function app_server(public_dir, port) {
 }
 
 
-function api_router_f(conn, cb) {
+
+function check_mysql(conn) {
+    conn.query('CREATE TABLE IF NOT EXISTS todos (id INT PRIMARY KEY AUTO_INCREMENT, text TEXT, completed BOOL)',
+        function (err) {
+            if (err) { throw err; }
+        }
+    )
+}
+
+function api_router(conn) {
+    check_mysql(conn);
     var router = express.Router();
     router.route('/todos')
         .post(function (req, res) {
-            var text = req.body.text
-            var completed = false
-            res.json({ id: undefined, message: 'not implmented!' });
+            var todoj = ''
+            req.on('data', function (data) {
+                todoj += data
+            })
+            req.on('end', function () {
+                var todo = JSON.parse(todoj)
+                var todo_text = todo.text
+                
+                conn.query(
+                    'INSERT INTO todos (text, completed) VALUES (?, ?)', [todo_text, false],
+                    function (err, result) {
+                        if (err) { throw err; }
+                        var inserted_id = result.insertId
+                        res.json(inserted_id);
+                    })
+            })
         })
         .get(function (req, res) {
-            res.json([{ id: 0, text: 'conn', completed: false }, { id: 1, text: 'get', completed: false },])
+            conn.query('SELECT id, text, completed FROM todos', function (err, results, fields) {
+                if (err) { throw err; }
+                res.json(results)
+            })
         });
     router.route('/todos/:id')
         .get(function (req, res) {
             var todo_id = req.params.id
-            res.json({ id: 0, text: 'not implmented', completed: false })
+            
+            conn.query('SELECT id, text, completed FROM todos WHERE id=?', [todo_id],
+                function (err, result) {
+                    if (err) { throw err; }
+                    res.json(result[0] || null)
+                })
         })
         .put(function (req, res) {
             var todo_id = req.params.id
-            var text = req.body.text
-            var completed = req.body.completed
-            res.json({ message: 'not implmented!' });
+            var todoj = ''
+            req.on('data', function (data) {
+                todoj += data
+            })
+            req.on('end', function () {
+                var todo = JSON.parse(todoj)
+                todo.id = todo_id
+                
+                conn.query('SELECT id, text, completed FROM todos WHERE id=?', [todo_id],
+                    function (err, result) {
+                        if (err) { throw err; }
+                        var todo_o = result[0] || null
+                        conn.query('UPDATE todos SET text=?, completed=? WHERE id=?', [todo.text, todo.completed, todo_id],
+                            function (err, result) {
+                                if (err) { throw err; }
+                                res.json(todo_o);
+                            })
+                    })
+            })
         })
         .delete(function (req, res) {
             var todo_id = req.params.id
-            res.json({ message: 'not implmented!' });
+            
+            conn.query('SELECT id, text, completed FROM todos WHERE id=?', [todo_id],
+                function (err, result) {
+                    if (err) { throw err; }
+                    var todo_o = result[0] || null
+                    conn.query('DELETE FROM todos WHERE id=?', [todo_id],
+                        function (err, result) {
+                            if (err) { throw err; }
+                            res.json(todo_o);
+                        })
+                })
         });
-    cb(router);
+    return router;
 }
 
 function api_server_f(port) {
-    var conn = new db.DB({
+    var conn = mysql.createConnection({
         host: 'localhost',
         user: 'root',
         password: '123456',
         database: 'node_test'
     });
 
-    conn.connect(function (conn, cb_) {
-        function cb(router) {
-            var api_app = express();
-            var cors = require('cors');
-            api_app.use(cors());
-            api_app.use('/', router);
+    conn.connect();
 
-            var server = api_app.listen(port, function () {
-                var host = server.address().address;
-                var port = server.address().port;
+    var api_app = express();
+    var cors = require('cors');
+    api_app.use(cors());
+    var router = api_router(conn);
+    api_app.use('/', router);
 
-                console.log('Api listening at http://%s:%s', host, port);
-            });
-        }
-        api_router_f(conn, cb);
-    }, function () {
+    var server = api_app.listen(port, function () {
+        var host = server.address().address;
+        var port = server.address().port;
+
+        console.log('Api listening at http://%s:%s', host, port);
     });
 }
 
@@ -82,6 +136,6 @@ function api_server_f(port) {
 
 
 (function () {
-    app_server(public_dir, main_port);
+    // app_server(public_dir, main_port);
     api_server_f(main_port + 1);
 })()

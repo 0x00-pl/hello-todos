@@ -167,7 +167,7 @@ export class RestStorage {
     }
     getDatas(cb_datas) {
         this.ajax('GET', this.rest_addr, '',
-            function (text) {
+            (text) => {
                 let datas = JSON.parse(text)
                 cb_datas(datas)
             })
@@ -175,7 +175,7 @@ export class RestStorage {
     addData(data, cb_pk) {
         let text = JSON.stringify(data)
         this.ajax('POST', this.rest_addr, text,
-            function (text) {
+            (text) => {
                 let pk = JSON.parse(text) | 0
                 this.onChangeHandle()
                 cb_pk(pk)
@@ -183,14 +183,14 @@ export class RestStorage {
     }
     getData(pk, cb_data) {
         this.ajax('GET', this.rest_addr + pk, '',
-            function (text) {
+            (text) => {
                 let data = JSON.parse(text)
                 cb_data(data)
             })
     }
     removeData(pk, cb_data) {
         this.ajax('DELETE', this.rest_addr + pk, '',
-            function (text) {
+            (text) => {
                 let data = JSON.parse(text)
                 this.onChangeHandle()
                 cb_data(data)
@@ -199,7 +199,7 @@ export class RestStorage {
     changeData(pk, data, cb_data) {
         let text = JSON.stringify(data)
         this.ajax('PUT', this.rest_addr + pk, text,
-            function (text) {
+            (text) => {
                 let data = JSON.parse(text)
                 this.onChangeHandle()
                 cb_data(data)
@@ -207,7 +207,7 @@ export class RestStorage {
     }
     ajax(protocol, url, text, cb_text) {
         var xhttp = new XMLHttpRequest()
-        xhttp.onreadystatechange = function () {
+        xhttp.onreadystatechange = () => {
             // TODO: handle errors
             if (xhttp.readyState == 4 && xhttp.status == 200) {
                 cb_text(xhttp.responseText)

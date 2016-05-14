@@ -8,12 +8,13 @@ import TodosInput from './todos-input'
 import TodosList from './todos-list'
 
 let localStorageKey = 'todos'
+let restStorageAddr = 'http://localhost:8081/todos'
 
 
 export default class Todos extends Component {
     constructor() {
         super()
-        new LocalStorage(this.onTodosChangeHandle.bind(this), localStorageKey, (s) => {
+        new RestStorage(this.onTodosChangeHandle.bind(this), restStorageAddr, (s) => {
             this.storage = s
         })
         this.state = { todos: [] }
