@@ -1,5 +1,6 @@
 // configures
 var public_dir = process.argv[2] || 'public';
+var api_only = process.argv[3] == 'api-only';
 var main_port = 8080;
 
 // imports
@@ -42,7 +43,7 @@ function api_router(conn) {
             req.on('end', function () {
                 var todo = JSON.parse(todoj)
                 var todo_text = todo.text
-                
+
                 conn.query(
                     'INSERT INTO todos (text, completed) VALUES (?, ?)', [todo_text, false],
                     function (err, result) {
@@ -61,7 +62,7 @@ function api_router(conn) {
     router.route('/todos/:id')
         .get(function (req, res) {
             var todo_id = req.params.id
-            
+
             conn.query('SELECT id, text, completed FROM todos WHERE id=?', [todo_id],
                 function (err, result) {
                     if (err) { throw err; }
@@ -77,7 +78,7 @@ function api_router(conn) {
             req.on('end', function () {
                 var todo = JSON.parse(todoj)
                 todo.id = todo_id
-                
+
                 conn.query('SELECT id, text, completed FROM todos WHERE id=?', [todo_id],
                     function (err, result) {
                         if (err) { throw err; }
@@ -92,7 +93,7 @@ function api_router(conn) {
         })
         .delete(function (req, res) {
             var todo_id = req.params.id
-            
+
             conn.query('SELECT id, text, completed FROM todos WHERE id=?', [todo_id],
                 function (err, result) {
                     if (err) { throw err; }
@@ -136,6 +137,6 @@ function api_server_f(port) {
 
 
 (function () {
-    // app_server(public_dir, main_port);
+    if (!api_only) { app_server(public_dir, main_port); }
     api_server_f(main_port + 1);
 })()
